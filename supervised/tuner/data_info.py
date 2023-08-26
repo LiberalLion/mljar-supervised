@@ -41,10 +41,8 @@ class DataInfo:
                 columns_info[col] += ["datetime_transform"]
             elif PreprocessingUtils.is_text(X[col]):
                 columns_info[col] = ["text_transform"]  # override other transforms
-            else:
-                # numeric type, check if scale needed
-                if PreprocessingUtils.is_scale_needed(X[col]):
-                    columns_info[col] += ["scale"]
+            elif PreprocessingUtils.is_scale_needed(X[col]):
+                columns_info[col] += ["scale"]
 
         target_info = []
         if machinelearning_task == BINARY_CLASSIFICATION:

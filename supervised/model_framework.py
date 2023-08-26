@@ -114,12 +114,7 @@ class ModelFramework:
             for k_fold in range(self.validation.get_n_splits()):
                 train_data, validation_data = self.validation.get_split(k_fold, repeat)
                 logger.debug(
-                    "Data split, train X:{} y:{}, validation X:{}, y:{}".format(
-                        train_data["X"].shape,
-                        train_data["y"].shape,
-                        validation_data["X"].shape,
-                        validation_data["y"].shape,
-                    )
+                    f'Data split, train X:{train_data["X"].shape} y:{train_data["y"].shape}, validation X:{validation_data["X"].shape}, y:{validation_data["y"].shape}'
                 )
 
                 # the proprocessing is done at every validation step
@@ -191,7 +186,7 @@ class ModelFramework:
                 learner.save(p)
                 del learner.model
                 learner.model = None
-                # end of learner training
+                        # end of learner training
 
         # end of validation loop
         self.callbacks.on_framework_train_end()
@@ -209,8 +204,7 @@ class ModelFramework:
         return early_stopping.metric.name
 
     def get_metric(self):
-        early_stopping = self.callbacks.get("early_stopping")
-        if early_stopping:
+        if early_stopping := self.callbacks.get("early_stopping"):
             return early_stopping.metric
         return Metric({"name": self.get_metric_name()})
 
@@ -283,11 +277,7 @@ class ModelFramework:
 
         y_predicted_average = y_predicted / float(len(self.learners))
 
-        y_predicted_final = self.preprocessings[0].prepare_target_labels(
-            y_predicted_average
-        )
-
-        return y_predicted_final
+        return self.preprocessings[0].prepare_target_labels(y_predicted_average)
 
     def get_additional_metrics(self):
         if self._additional_metrics is None:
@@ -329,7 +319,7 @@ class ModelFramework:
         predictions.to_csv(predictions_fname, index=False)
 
         saved = []
-        for i, l in enumerate(self.learners):
+        for l in self.learners:
             p = os.path.join(model_path, f"{l.name}.{l.file_extension()}")
             # l.save(p)
             saved += [p]

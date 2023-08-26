@@ -135,8 +135,7 @@ class XgbAlgorithm(BaseAlgorithm):
         dtrain = xgb.DMatrix(
             X.to_numpy() if isinstance(X, pd.DataFrame) else X, missing=np.NaN
         )
-        a = self.model.predict(dtrain, ntree_limit=self.best_ntree_limit)
-        return a
+        return self.model.predict(dtrain, ntree_limit=self.best_ntree_limit)
 
     def copy(self):
         return copy.deepcopy(self)
@@ -144,10 +143,10 @@ class XgbAlgorithm(BaseAlgorithm):
     def save(self, model_file_path):
         self.model.save_model(model_file_path)
         self.model_file_path = model_file_path
-        logger.debug("XgbAlgorithm save model to %s" % model_file_path)
+        logger.debug(f"XgbAlgorithm save model to {model_file_path}")
 
     def load(self, model_file_path):
-        logger.debug("XgbLearner load model from %s" % model_file_path)
+        logger.debug(f"XgbLearner load model from {model_file_path}")
         self.model = xgb.Booster()  # init model
         self.model.load_model(model_file_path)
         self.model_file_path = model_file_path

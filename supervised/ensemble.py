@@ -209,9 +209,7 @@ class Ensemble:
         self.train_time = time.time() - start_time
 
     def predict(self, X, X_stacked=None):
-        logger.debug(
-            "Ensemble.predict with {} models".format(len(self.selected_models))
-        )
+        logger.debug(f"Ensemble.predict with {len(self.selected_models)} models")
         y_predicted_ensemble = None
         total_repeat = 0.0
 
@@ -260,14 +258,13 @@ class Ensemble:
             repeat = selected["repeat"]
             models_json += [{"model": model.to_json(), "repeat": repeat}]
 
-        json_desc = {
+        return {
             "library_version": self.library_version,
             "algorithm_name": self.algorithm_name,
             "algorithm_short_name": self.algorithm_short_name,
             "uid": self.uid,
             "models": models_json,
         }
-        return json_desc
 
     def from_json(self, json_desc):
         self.library_version = json_desc.get("library_version", self.library_version)
@@ -293,14 +290,14 @@ class Ensemble:
         logger.info(f"Save the ensemble to {model_path}")
 
         predictions = self.get_out_of_folds()
-        predictions_fname = os.path.join(model_path, f"predictions_ensemble.csv")
+        predictions_fname = os.path.join(model_path, "predictions_ensemble.csv")
         predictions.to_csv(predictions_fname, index=False)
 
         with open(os.path.join(model_path, "ensemble.json"), "w") as fout:
-            ms = []
-            for selected in self.selected_models:
-                ms += [{"model": selected["model"]._name, "repeat": selected["repeat"]}]
-
+            ms = [
+                {"model": selected["model"]._name, "repeat": selected["repeat"]}
+                for selected in self.selected_models
+            ]
             desc = {
                 "name": self._name,
                 "ml_task": self._ml_task,

@@ -155,11 +155,7 @@ class MljarTuner:
             return self.get_params_stack_models(stacked_models)
         elif step == "ensemble_stacked":
 
-            # do we have stacked models?
-            any_stacked = False
-            for m in models:
-                if m._is_stacked:
-                    any_stacked = True
+            any_stacked = any(m._is_stacked for m in models)
             if not any_stacked:
                 return []
 
@@ -227,9 +223,9 @@ class MljarTuner:
 
     def adjust_validation_params(self, models_cnt):
         generated_params = []
-        for model_type in ["Decision Tree"]:
-            models_to_check = 1
+        models_to_check = 1
 
+        for model_type in ["Decision Tree"]:
             logger.info(f"Generate parameters for {model_type} (#{models_cnt + 1})")
             params = self._get_model_params(model_type, seed=1)
             if params is None:
@@ -371,7 +367,7 @@ class MljarTuner:
                     models_cnt += 1
 
         return_params = []
-        for i in range(100):
+        for _ in range(100):
             total = 0
             for m in ["Xgboost", "LightGBM", "CatBoost"]:
                 if generated_params[m]:
@@ -718,5 +714,5 @@ class MljarTuner:
             for k, v in params[main_key].items():
                 if k == "seed":
                     continue
-                key += "_{}_{}".format(k, v)
+                key += f"_{k}_{v}"
         return key

@@ -74,11 +74,7 @@ class AdditionalMetrics:
             details["accuracy"] += [accuracy_score(target, response)]
             details["precision"] += [precision_score(target, response)]
             details["recall"] += [recall_score(target, response)]
-            if i == 0:
-                details["mcc"] += [0.0]
-            else:
-                details["mcc"] += [matthews_corrcoef(target, response)]
-
+            details["mcc"] += [0.0] if i == 0 else [matthews_corrcoef(target, response)]
         # max metrics
         max_metrics = {
             "logloss": {
@@ -135,7 +131,7 @@ class AdditionalMetrics:
 
         if "target" in target.columns.tolist():
             # multiclass coding with integer
-            labels = {i: l for i, l in enumerate(all_labels)}
+            labels = dict(enumerate(all_labels))
             target = target["target"].map(labels)
         else:
             # multiclass coding with one-hot encoding
@@ -179,10 +175,9 @@ class AdditionalMetrics:
             "RMSE": lambda t, p: np.sqrt(mean_squared_error(t, p)),
             "R2": r2_score,
         }
-        max_metrics = {}
-        for k, v in regression_metrics.items():
-            max_metrics[k] = v(target, predictions)
-
+        max_metrics = {
+            k: v(target, predictions) for k, v in regression_metrics.items()
+        }
         return {
             "max_metrics": pd.DataFrame(
                 {
@@ -239,11 +234,9 @@ class AdditionalMetrics:
 
         with open(os.path.join(model_path, "README.md"), "w") as fout:
             fout.write(model_desc)
-            fout.write("\n## Metric details\n{}\n\n".format(max_metrics.to_markdown()))
+            fout.write(f"\n## Metric details\n{max_metrics.to_markdown()}\n\n")
             fout.write(
-                "\n## Confusion matrix (at threshold={})\n{}".format(
-                    np.round(threshold, 6), confusion_matrix.to_markdown()
-                )
+                f"\n## Confusion matrix (at threshold={np.round(threshold, 6)})\n{confusion_matrix.to_markdown()}"
             )
             AdditionalMetrics.add_learning_curves(fout)
             AdditionalMetrics.add_tree_viz(fout, model_path, fold_cnt, repeat_cnt)
@@ -265,10 +258,8 @@ class AdditionalMetrics:
 
         with open(os.path.join(model_path, "README.md"), "w") as fout:
             fout.write(model_desc)
-            fout.write("\n### Metric details\n{}\n\n".format(max_metrics.to_markdown()))
-            fout.write(
-                "\n## Confusion matrix\n{}".format(confusion_matrix.to_markdown())
-            )
+            fout.write(f"\n### Metric details\n{max_metrics.to_markdown()}\n\n")
+            fout.write(f"\n## Confusion matrix\n{confusion_matrix.to_markdown()}")
             AdditionalMetrics.add_learning_curves(fout)
             AdditionalMetrics.add_tree_viz(fout, model_path, fold_cnt, repeat_cnt)
             AdditionalMetrics.add_linear_coefs(fout, model_path, fold_cnt, repeat_cnt)
@@ -412,7 +403,7 @@ class AdditionalMetrics:
 
         fig.savefig(os.path.join(model_path, "permutation_importance.png"))
         fout.write("\n\n## Permutation-based Importance\n")
-        fout.write(f"![Permutation-based Importance](permutation_importance.png)")
+        fout.write("![Permutation-based Importance](permutation_importance.png)")
 
         if "random_feature" in df.index.tolist():
 
@@ -492,7 +483,7 @@ class AdditionalMetrics:
                 ax.set_title("SHAP feature importance")
             fig.savefig(os.path.join(model_path, "shap_importance.png"))
             fout.write("\n\n## SHAP Importance\n")
-            fout.write(f"![SHAP Importance](shap_importance.png)")
+            fout.write("![SHAP Importance](shap_importance.png)")
         except Exception as e:
             logger.error(
                 f"Exception while saving SHAP importance. {str(e)}\nContinuing ..."
@@ -609,13 +600,14 @@ class AdditionalMetrics:
             if not len(dep_plots):
                 return
 
-            # get number of classes
-            start_ind = 0
-            for i, a in enumerate(dep_plots[0].split("_")):
-                if a == "class":
-                    start_ind = i + 1
-                    break
-
+            start_ind = next(
+                (
+                    i + 1
+                    for i, a in enumerate(dep_plots[0].split("_"))
+                    if a == "class"
+                ),
+                0,
+            )
             classes = []
             for l in dep_plots:
                 a = l.split("_")

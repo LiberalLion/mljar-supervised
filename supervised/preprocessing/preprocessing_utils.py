@@ -62,9 +62,7 @@ class PreprocessingUtils(object):
     def is_0_1(x_org):
         x = x_org[~pd.isnull(x_org)]
         u = np.unique(x)
-        if len(u) != 2:
-            return False
-        return 0 in u and 1 in u
+        return False if len(u) != 2 else 0 in u and 1 in u
 
     @staticmethod
     def num_class(x_org):
@@ -77,9 +75,7 @@ class PreprocessingUtils(object):
         x = x_org[~pd.isnull(x_org)]
         abs_avg = np.abs(np.mean(x))
         stddev = np.std(x)
-        if abs_avg > 0.5 or stddev > 1.5:
-            return True
-        return False
+        return abs_avg > 0.5 or stddev > 1.5
 
     @staticmethod
     def is_log_scale_needed(x_org):
@@ -113,20 +109,14 @@ class PreprocessingUtils(object):
     @staticmethod
     def get_min(x):
         v = np.amin(np.nanmin(x))
-        if pd.isnull(v):
-            return 0
-        return float(v)
+        return 0 if pd.isnull(v) else float(v)
 
     @staticmethod
     def get_mean(x):
         v = np.nanmean(x)
-        if pd.isnull(v):
-            return 0
-        return float(v)
+        return 0 if pd.isnull(v) else float(v)
 
     @staticmethod
     def get_median(x):
         v = np.nanmedian(x)
-        if pd.isnull(v):
-            return 0
-        return float(v)
+        return 0 if pd.isnull(v) else float(v)

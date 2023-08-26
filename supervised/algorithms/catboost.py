@@ -86,12 +86,10 @@ class CatBoostAlgorithm(BaseAlgorithm):
                 eval_set=eval_set,
                 early_stopping_rounds=self.early_stopping_rounds,
                 verbose_eval=False,
-            )        
+            )
             elapsed_time = np.round(time.time() - start_time, 2)
             new_rounds = int(min(self.rounds, 3600 / elapsed_time))
-            if new_rounds < 10:
-                new_rounds = 10
-            return new_rounds
+            return max(new_rounds, 10)
         except Exception as e:
             return 1000
 
@@ -150,10 +148,10 @@ class CatBoostAlgorithm(BaseAlgorithm):
     def save(self, model_file_path):
         self.model.save_model(model_file_path)
         self.model_file_path = model_file_path
-        logger.debug("CatBoostAlgorithm save model to %s" % model_file_path)
+        logger.debug(f"CatBoostAlgorithm save model to {model_file_path}")
 
     def load(self, model_file_path):
-        logger.debug("CatBoostLearner load model from %s" % model_file_path)
+        logger.debug(f"CatBoostLearner load model from {model_file_path}")
 
         # waiting for fix https://github.com/catboost/catboost/issues/696
         Algo = CatBoostClassifier

@@ -111,22 +111,21 @@ class LightgbmAlgorithm(BaseAlgorithm):
     def save(self, model_file_path):
         self.model.save_model(model_file_path)
         self.model_file_path = model_file_path
-        logger.debug("LightgbmAlgorithm save model to %s" % model_file_path)
+        logger.debug(f"LightgbmAlgorithm save model to {model_file_path}")
 
     def load(self, model_file_path):
-        logger.debug("LightgbmAlgorithm load model from %s" % model_file_path)
+        logger.debug(f"LightgbmAlgorithm load model from {model_file_path}")
         self.model_file_path = model_file_path
         self.model = lgb.Booster(model_file=model_file_path)
 
     def get_params(self):
-        json_desc = {
+        return {
             "library_version": self.library_version,
             "algorithm_name": self.algorithm_name,
             "algorithm_short_name": self.algorithm_short_name,
             "uid": self.uid,
             "params": self.params,
         }
-        return json_desc
 
     def set_params(self, json_desc):
         self.library_version = json_desc.get("library_version", self.library_version)
